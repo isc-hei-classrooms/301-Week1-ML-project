@@ -1,51 +1,51 @@
 ---
-title: "YOUR TITLE"
-subtitle: "YOUR SUBTITLE"
+title: "Project 1 - House Price Prediction"
+subtitle: "Presentation"
 format:
   revealjs:
-    theme: [default, custom-styles.scss]
+    theme: [default]
     width: 1920
     height: 1080
-    margin: 0.04
-    minScale: 0.2
-    maxScale: 2.0
     slide-number: true
-    incremental: false
-    code-overflow: wrap
-    toc: false
-execute:
-  warning: false
-  message: false
 jupyter: python3
 ---
 
+## 1. Problem Presentation
 
-## Business Question
+- Goal: predict **house prices** from features (quality, number of rooms, surface, etc.).  
+- Pipeline includes data cleaning, encoding, and train/validation/test splitting.  
 
+![](images/correlation.png)
 
-## Dataset Presentation
+---
 
-Below we demonstrate how to include a simple Python plot in the report. 
+## 2. Tested Models and Complexities
 
-```{python}
-%matplotlib inline
-import numpy as np
-import matplotlib.pyplot as plt
+- Model 1: **Linear Regression** (`sklearn.linear_model.LinearRegression`) – low complexity.  
+- Model 2: **Polynomial Regression (degree 2)** (`sklearn.preprocessing.PolynomialFeatures` + `LinearRegression`) – higher complexity.  
+- Model 3: **Ridge Regression** (`sklearn.linear_model.Ridge`) – adds regularization to reduce overfitting.  
 
-X = np.linspace(0, 4, 20)
-y = 2 * X + 1
+---
 
-plt.plot(X, y)
-```
+## 3. Polynomial Degree Choice and Learning Curve
 
-## Exploratory Data Analysis
+- Tested polynomial regression of degree 2.  
+- Captures non-linearities but may lead to overfitting.
 
+---
 
-## Modelling
+## 4. Regularization
 
+- Added Ridge regularization to reduce variance and stabilize predictions.  
+- Shrinks coefficient magnitudes.  
+- Improves generalization compared to plain polynomial regression.  
 
-## Model Performance and Validatation
+---
 
+## 5. Final Model and Cost Function Comparison
 
-## Business Conclusions and Next Steps
+- Evaluation metrics: R², RMSE, MAE.  
+- Best compromise obtained with Ridge Regression.  
+- Comparison across at least 3 (model / cost function) combinations.  
 
+![](images/model_comparison.png)
