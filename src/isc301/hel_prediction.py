@@ -3,10 +3,54 @@ from typing import Callable, Optional
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from sklearn.linear_model import Lasso, LinearRegression, Ridge
+from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler, PolynomialFeatures
 
+from isc301 import config
 from isc301.utils import lsm_linear
+
+
+class Col:
+    surface = "surf_hab"
+    mat_quality = "qualite_materiau"
+    surface_below = "surface_sous_sol"
+    glob_quality = "qualite_globale"
+    car_spaces = "n_garage_voitures"
+    toilets = "n_toilettes"
+    fireplaces = "n_cheminees"
+    rooms = "n_pieces"
+    kitchens = "n_cuisines"
+    bedrooms = "n_chambres_coucher"
+    year = "annee_vente"
+    price = "prix"
+    roof = "type_toit"
+    kind = "type_batiment"
+    kitchen_quality = "qualite_cuisine_num"
+    surface_garden = "surface_jardin"
+    _numerical = []
+    _categorical = []
+
+
+Col._numerical = [
+    Col.surface,
+    Col.mat_quality,
+    Col.surface_below,
+    Col.glob_quality,
+    Col.car_spaces,
+    Col.toilets,
+    Col.fireplaces,
+    Col.rooms,
+    Col.kitchens,
+    Col.bedrooms,
+    Col.year,
+    Col.price,
+    Col.kitchen_quality,
+    Col.surface_garden,
+]
+
+Col._categorical = [Col.roof, Col.kind]
 
 
 class Model(abc.ABC):
@@ -120,7 +164,7 @@ class LinearModel(Model):
 
 class PolyModel(Model):
     def __init__(
-        self, x_cols: str | list[str], y_col: str, reg, degree: int = 2
+        self, x_cols: str | list[str], y_col: str, reg, scaler_cls, degree: int = 2
     ) -> None:
         super().__init__()
         self.x_cols: list[str] = [x_cols] if isinstance(x_cols, str) else x_cols
@@ -128,8 +172,7 @@ class PolyModel(Model):
         self.degree: int = degree
         self.features: PolynomialFeatures = PolynomialFeatures(self.degree)
         self.model = reg
-        # self.scaler: StandardScaler = StandardScaler()
-        self.scaler: MinMaxScaler = MinMaxScaler()
+        self.scaler = scaler_cls()
 
     @property
     def vars(self):
@@ -153,13 +196,61 @@ class PolyModel(Model):
         print(self.model.coef_)
 
 
-def data_preprocessing(df: pd.DataFrame) -> tuple[np.ndarray, np.ndarray]:
-    raise NotImplementedError
+def main():
+    df: pd.DataFrame = pd.read_csv(config.houses_raw_path)
+    df2: pd.DataFrame = df.assign(is_premium=np.where(df["qualite_globale"] > 6, 1, 0))
+
+    # Linear model
+    linear: Model = LinearModel(Col.surface, Col.price)
+
+    # Polynomial models (linear regression, Lasso, Ridge)
+    x_vars: list[str] = [
+        Col.surface,
+        Col.mat_quality,
+        Col.rooms,
+        Col.car_spaces,
+        "is_premium",
+    ]
+    scaler_cls = MinMaxScaler
+    poly_lin: Model = PolyModel(
+        x_vars, Col.price, LinearRegression(), scaler_cls, degree=6
+    )
+    poly_lasso: Model = PolyModel(
+        x_vars, Col.price, Lasso(1, max_iter=10_000), scaler_cls, degree=6
+    )
+    poly_ridge: Model = PolyModel(
+        x_vars, Col.price, Ridge(10, max_iter=10_000), scaler_cls, degree=6
+    )
+
+    # Evaluate models
+    metric = mean_absolute_error
+
+    print("[Linear model]")
+    linear.process_dataset(df2, metric)
+    print()
+
+    print("[Poly linear regression]")
+    poly_lin.process_dataset(df2, metric)
+    print()
+
+    print("[Poly Lasso]")
+    poly_lasso.process_dataset(df2, metric)
+    print()
+
+    print("[Poly Ridge]")
+    df_ridge: pd.DataFrame = poly_ridge.process_dataset(df2, metric)
+
+    # More in-depth analysis of polynomial (Ridge) model
+    poly_ridge.explain()
+    df3 = df_ridge.copy()
+    poly_ridge.plot_residuals()
+    df3["residual"] = df3["residual"].abs()
+    df3 = df_ridge.sort_values("residual", ascending=False)
+
+    print("Largest residuals (abs) for polynomial model using Ridge")
+    print(df3.head())
+    plt.show()
 
 
-def model_fit(X: np.ndarray, Y: np.ndarray) -> None:
-    raise NotImplementedError
-
-
-def model_predict(X: np.ndarray) -> np.ndarray:
-    raise NotImplementedError
+if __name__ == "__main__":
+    main()
