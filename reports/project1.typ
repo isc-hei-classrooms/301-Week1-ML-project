@@ -8,7 +8,8 @@
 )
 
 #show: simple-theme.with(
-  aspect-ratio: "16-9"
+  aspect-ratio: "16-9",
+  footer: [301.1 Project 1 - Louis HEREDERO]
 )
 
 #let TODO = box(width: 1fr, fill: yellow, inset: .4em)[TODO]
@@ -106,6 +107,8 @@ Gives an idea of what the housing market looks like
 - #num[Kitchen quality]
 - #num[Garden surface]
 #v(1fr)
+#set text(size: .8em)
+#show: align.with(right)
 #num[] = Numerical\
 #cat[] = Categorical
 ]
@@ -137,8 +140,8 @@ Gives an idea of what the housing market looks like
 
 #stack(dir: ltr, spacing: 1em)[
   #figure(
-    image(output(8).source, height: 75%),
-    caption: [Correlation between variables]
+    image(output(8).source, height: 11.1cm),
+    //caption: [Correlation between variables]
   )
 ][
   *High correlations with price*
