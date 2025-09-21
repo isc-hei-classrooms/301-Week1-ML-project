@@ -24,4 +24,5 @@ raw_data_folder = os.path.join(project_root, config["raw_data_folder"])
 clean_data_folder = os.path.join(project_root, config["clean_data_folder"])
 
 # Specific datasets paths.
-fuel_consumption_raw_path = os.path.join(raw_data_folder,"fuel_consumption.csv")
+fuel_consumption_raw_path = os.path.join(raw_data_folder, "fuel_consumption.csv")
+houses_raw_path = os.path.join(raw_data_folder, "maisons.csv")
